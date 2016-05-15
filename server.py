@@ -56,7 +56,7 @@ def get_building(building):
 def index():
     return open('index.html').read()
 
-@app.route('/get/buildings')
+@app.route(prefixcode+'/get/buildings')
 def get_buildings():
     weekday = request.args.get('day', 'M')
     if weekday not in "MTWRFS":

@@ -3,7 +3,7 @@
 Uses the Schedule of Classes from UC Berkeley to find open rooms throught campus to study.
 This app requires a class schedule pared, which is included in the repository.
 
-This site is running live at http://dibya.xyz/calrf
+This site is running live at http://dibya.xyz/roomfinder/
 
 # Installation
 
