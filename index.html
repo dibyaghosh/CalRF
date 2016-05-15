@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Berkeley Room Finder</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+  <!-- Compiled and minified JavaScript -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+
+</head>
+<body ng-app="myApp" ng-controller="myCtrl">
+<nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo"> Cal Room Finder</a>
+
+
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contribute</a></li>
+=      </ul>
+    </div>
+  </nav>
+   <nav>
+    <div class="nav-wrapper blue-grey white-text">
+      <div class="col s12">
+        <a href="#!" class="blue-grey white-text breadcrumb ">List View</a>
+        <a  onclick="Materialize.toast('This feature hasnt been implemented yet! Sorry :(', 4000)" class=" blue-grey white-text breadcrumb">Map View</a>
+        <a  onclick="Materialize.toast('This feature hasnt been implemented yet! Sorry :(', 4000)" class=" blue-grey white-text breadcrumb">Search</a>
+      </div>
+    </div>
+  </nav>
+
+<div class="row" ng-show ="firstfetch">
+        <div class="col s6 m4 l3" ng-repeat="building in buildings">
+          <div class="card">
+    <div class="card-image waves-effect waves-block waves-light">
+      <img class="activator buildingimage" ng-src="{{getUrlofBuilding(building[0])}}">
+    </div>
+    <div class="card-content">
+      <span class="card-title activator grey-text text-darken-4">{{building[1].slice(0,10)}}<i class="material-icons right">more_vert</i></span>
+      <p><a ng-click="getClass(building)" href="#modal1">See Open Rooms</a></p>
+    </div>
+    <div class="card-reveal">
+      <span class="card-title grey-text text-darken-4">{{building[1]}}<i class="material-icons right">close</i></span>
+      <p>{{building[1]}} has {{building[2]}} open rooms right now!</p>
+        <a class="waves-effect waves-light btn" ng-click="getClass(building)"><i class="material-icons left">cloud</i>Check them out</a>
+
+    </div>
+        </div>
+        </div>
+      </div>
+
+
+
+
+
+<div id="modal1" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>{{mainbuilding}}</h4>
+      <ul class="collection">
+    <li class="collection-item avatar dismissable" ng-repeat="room in mainrooms">
+      <i class="material-icons circle">folder</i>
+      <span class="title">{{room[0]}}</span>
+      <p ng-show="room[2]">This room is empty for the next 5 hours!</p>
+      <p ng-show="midTime(room)">This room is open till {{toTime(room[1])}}
+      </p>
+      <p ng-show="room[3]<10">This room is full right now!</p>
+      <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
+    </li>
+    </div>
+    <div class="modal-footer">
+    <a href="#!" class="modal-close btn-flat">See all Rooms</a>
+      <a href="#!" class=" modal-action modal-close waves-effect btn-flat">Close</a>
+    </div>
+  </div>
+
+
+
+
+
+
+  <!-- JAVASCRIPT -->
+  <script type="text/javascript">
+  	var app = angular.module('myApp', []);
+  	app.controller('myCtrl', function($scope,$http) {
+  	$scope.midTime = function(room){
+  		return room[2]==false && room[3]>10;
+  	}
+  	$scope.toTime = function(somenumber){
+  		var hours = Math.floor(somenumber/100);
+  		var minutes = (somenumber%100);
+  		minutes = (minutes < 10) ? ("0" + minutes) : minutes;
+  		return (hours%12)+":"+minutes+" "+["AM","PM"][Math.floor(hours/10)];
+  	}
+  	$scope.getUrlofBuilding = function(building){
+  		if(building == "valleylifesciences" || building == ' genetics&plantbio'){
+  			building = "vlsb";
+  		}
+  		if(building == 'dwinelleannex'){
+  			building = 'dwinelle';
+  		}
+  		if($.inArray(building,['giauque','haaspavilion','pauley','hearstgymtennis','2251college','blum','internationalhouse','rsf','bancroftlibrary','unit3dining','rsfpiekeraquatics','hearst','off','memorialstadium','1995university'])!=-1){
+  			return '';
+  		}
+  		return "http://access-guide.berkeley.edu/sites/default/files/"+building+".jpg";
+  	};
+  	$scope.firstfetch = false;
+    $scope.firstName= "John";
+    $scope.lastName= "Doe";
+    $http.get('get/buildings').then(function(response){
+    	$scope.buildings = response.data.data.slice(0,20);
+    	$scope.firstfetch =true;
+	    	setTimeout(function(){ $('.collapsible').collapsible({
+	      		accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+	    	}); }, 1000);
+    	});
+
+    $scope.getClass = function(building){
+    	var d = new Date()
+    	var start = d.getHours()*100+d.getMinutes();
+    	var end = start+500;
+    	var weekday = ['S','M','T','W','R','F','S'][2]; //['S','M','T','W','R','F','S'][d.getDay()]
+    	var url = "buildings/"+building[0]+"?day="+weekday+"&start="+start+"&end="+end;
+    	console.log(url);
+    	$http.get(url).then(function(response){
+    		console.log(response.data.data);
+    		$scope.mainrooms = response.data.data.slice(0,30);
+    	});
+    	$('#modal1').openModal();
+    	$scope.mainbuilding = building[1];
+
+    };
+});
+
+  </script>
+  	<!-- CSS -->
+
+<style type="text/css">
+	  body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1 0 auto;
+  }
+  .buildingimage {
+  	width: 300px;
+  	height: 200px;
+  }
+</style>
+</body>
+</html>
